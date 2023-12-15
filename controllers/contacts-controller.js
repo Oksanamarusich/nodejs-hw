@@ -32,12 +32,12 @@ const add = async (req, res, next) => {
     try {
         const {error} = contactAddSchema.validate(req.body);
         if (error) {
-            throw HttpError(400, "missing required name field");
+            throw HttpError(400, error.message);
         }
         
         const result = await contactsService.addContact(req.body);
         
-        res.status(201).json(result)   
+        res.status(201).json(result);   
     }
     catch (error) {
         next(error);
@@ -71,8 +71,8 @@ const deleteById = async (req, res, next) => {
         const result = contactsService.removeContact(contactId);
         
         if (!result) {
-            throw HttpError(404, "Not found");
-        }
+            throw HttpError(404);
+            }
 
         res.json({ message: "contact deleted" });
     }
@@ -89,6 +89,6 @@ export default {
     getById,
     add,
     updateById,
-    deleteById
+    deleteById,
      
 }
