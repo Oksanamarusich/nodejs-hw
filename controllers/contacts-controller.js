@@ -64,26 +64,6 @@ const updateById = async (req, res, next) => {
     }
 }
 
-
-// const updateById = async (req, res, next) => {
-//     try {
-//         const { error } = contactUpdateSchema.validate(req.body);
-//         if (error) {
-//             throw HttpError(400, error.message);
-//         }
-//         const { contactId } = req.params;
-//         const result = await contactsService.updateContact(contactId, req.body)
-//         if (!result) {
-//             throw HttpError(404);
-//         }
-//         res.json(result);
-
-//      }
-//     catch (error) {
-//         next(error);
-//     }
-  
-// }
 const deleteById = async (req, res, next) => {
     try {
         const { contactId } = req.params;
