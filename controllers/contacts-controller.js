@@ -1,10 +1,10 @@
-import fs from "fs/promises";
-import path from "path";
+// import fs from "fs/promises";
+// import path from "path";
 
 import Contact, { contactAddSchema, contactUpdateSchema, contactUpdateFavoriteSchema } from "../models/Contact.js";
 import { HttpError } from "../helpers/index.js";
  
-const avatarsPath = path.resolve("public", "avatars");
+// const avatarsPath = path.resolve("public", "avatars");
 
 const getAll = async (req, res, next) => {
     try {
@@ -27,7 +27,7 @@ const getById = async (req, res, next) => {
         const { _id: owner } = req.user._id;
         const result = await Contact.findOne({_id, owner});
         if (!result) {
-            throw HttpError(404, `Movie with id=${contactId} not found`);
+            throw HttpError(404, `Movie with id=${ req.params.contactId} not found`);
             }
     
         res.json(result);
@@ -45,11 +45,12 @@ const add = async (req, res, next) => {
             throw HttpError(400, error.message);
         }
         const { _id: owner } = req.user._id;
-        const { path: oldPath, filename } = req.file;
-        const newPath = path.join(avatarsPath, filename);
-        await fs.rename(oldPath, newPath);
-        const avatar = path.join("avatars", filename);
-        const result = await Contact.create({ ...req.body, avatar, owner });
+        // const { path: oldPath, filename } = req.file;
+        // const newPath = path.join(avatarsPath, filename);
+        // await fs.rename(oldPath, newPath);
+        // const avatar = path.join("avatars", filename);
+        // const result = await Contact.create({ ...req.body, avatar, owner });
+        const result = await Contact.create({ ...req.body, owner });
         
         res.status(201).json(result);   
     }

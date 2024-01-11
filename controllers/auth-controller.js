@@ -1,12 +1,17 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import gravatar from "gravatar";
+import path from "path";
+import fs from "fs/promises";
 
 import User, { userSignupSchema, userSigninSchema } from "../models/User.js";
 
 import { HttpError } from "../helpers/index.js";
 
 const { JWT_SECRET } = process.env;
+
+const avatarsPath = path.resolve("public", "avatars");
 
 const signup = async (req, res, next) => {
     try {
@@ -22,8 +27,8 @@ const signup = async (req, res, next) => {
         }
 
         const hashPassword = await bcrypt.hash(password, 10)
-        
-        const newUser = await User.create({ ...req.body, password: hashPassword});
+        const avatarURL = gravatar.url(email);
+        const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL});
         res.status(201).json({
             user: ({
                 email: newUser.email,
@@ -94,6 +99,20 @@ const signout = async (req, res) => {
 
     res.status(204).json();
 }
+
+const updateAvatar = async (req, res) => {
+    const { _id } = req.user;
+    const { path: oldPath, filename } = req.file;
+    const originalname = `${_id}_${filename}`;
+    const resultUpload = path.join(avatarsPath, originalname);
+    await fs.rename(oldPath, resultUpload);
+    const avatarURL = path.join("avatars", originalname);
+    await User.findByIdAndUpdate(_id, { avatarURL });
+
+    res.json({
+        avatarURL,
+    })
+}
     
 
 
@@ -101,5 +120,6 @@ export default {
     signup,
     signin, 
     getCurrent,
-    signout
+    signout,
+    updateAvatar
 }
