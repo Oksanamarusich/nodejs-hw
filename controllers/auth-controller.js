@@ -46,10 +46,10 @@ const signup = async (req, res, next) => {
 
 const signin = async (req, res, next) => {
     try {
-       const { error } = userSigninSchema.validate(req.body);
+        const { error } = userSigninSchema.validate(req.body);
         if (error) {
             throw HttpError(400, error.message);
-        } 
+        }
 
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -59,15 +59,15 @@ const signin = async (req, res, next) => {
 
         const passwordCompare = await bcrypt.compare(password, user.password);
         if (!passwordCompare) {
-          throw HttpError(401, "Email or password is wrong");  
+            throw HttpError(401, "Email or password is wrong");
         }
 
-        const {_id: contactId} = user;
-    const payload = {
-     contactId
+        const { _id: contactId } = user;
+        const payload = {
+            contactId
         };
 
-         const token =jwt.sign(payload, JWT_SECRET, {expiresIn: "23h"});
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
         await User.findByIdAndUpdate(contactId, { token });
         
         res.json({
@@ -78,46 +78,55 @@ const signin = async (req, res, next) => {
             })
              
         })
-     }
+    }
     catch (error) {
         next(error);
     }
-}
+};
 
-const getCurrent = async (req, res)=>{
+const getCurrent = async (req, res) => {
     
-        const { email, subscription } = req.user;
+    const { email, subscription } = req.user;
     
     res.json({
         email,
         subscription
     });
     
-}
+};
 
 const signout = async (req, res) => {
     const { _id } = req.user;
     await User.findByIdAndUpdate(_id, { token: "" });
 
     res.status(204).json();
-}
+};
 
-const updateAvatar = async (req, res) => {
-    const { _id } = req.user;
-    const { path: oldPath, filename } = req.file;
-    const resultUpload = path.join(avatarsPath, filename);
-    const img = await Jimp.read(oldPath)
-    await img.autocrop()
-        .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
-        .writeAsync(oldPath)
-    await fs.rename(oldPath, resultUpload);
-    const avatarURL = path.join("avatars", filename);
-    await User.findByIdAndUpdate(_id, { avatarURL });
+const updateAvatar = async (req, res, next) => {
+    try {
+       if (!req.file) {
+          throw HttpError(404, "File not found");  
+        }
+        
+        const { _id } = req.user;
+        const { path: oldPath, filename } = req.file;
+        const resultUpload = path.join(avatarsPath, filename);
+        const img = await Jimp.read(oldPath)
+        await img.autocrop()
+            .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
+            .writeAsync(oldPath)
+        await fs.rename(oldPath, resultUpload);
+        const avatarURL = path.join("avatars", filename);
+        await User.findByIdAndUpdate(_id, { avatarURL });
 
-    res.json({
-        avatarURL,
-    })
-}
+        res.json({
+            avatarURL,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+};
     
 
 
