@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs/promises";
 import Jimp from "jimp";
 
-import User, { userSignupSchema, userSigninSchema, userEmailSchema } from "../models/User.js";
+import User, { userSignupSchema, userSigninSchema, userEmailSchema  } from "../models/User.js";
 
 import { HttpError, sendEmail } from "../helpers/index.js";
 
@@ -141,18 +141,19 @@ const updateAvatar = async (req, res, next) => {
         next(error)
     }
 };
-   
+
 const verify = async (req, res) => {
-     
     const { verificationToken } = req.params;
     const user = await User.findOne({ verificationToken });
+
     if (!user) {
         throw HttpError(404, "User not found");
     }
-    await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" })
-    
+
+    await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" });
+
     res.json({
-        message: "Verification successful"
+        message: "Email verify success"
     })
 };
 
@@ -163,7 +164,7 @@ const resendVerifyEmail = async (req, res, next) => {
         if (error) {
             throw HttpError(400, error.message);
         }
-        
+
         const { email } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
