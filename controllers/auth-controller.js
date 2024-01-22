@@ -142,8 +142,9 @@ const updateAvatar = async (req, res, next) => {
     }
 };
 
-const verify = async (req, res) => {
-    const { verificationToken } = req.params;
+const verify = async (req, res, next) => {
+    try {
+        const { verificationToken } = req.params;
     const user = await User.findOne({ verificationToken });
 
     if (!user) {
@@ -155,6 +156,10 @@ const verify = async (req, res) => {
     res.json({
         message: "Email verify success"
     })
+    } catch (error) {
+        next();
+    }
+    
 };
 
 const resendVerifyEmail = async (req, res, next) => {
